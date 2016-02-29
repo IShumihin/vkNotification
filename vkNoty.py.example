@@ -1,0 +1,7 @@
+from main import Main
+
+if __name__ == '__main__':
+    main = Main('login', 'password', debug=1)
+    main.enable().main_loop()
+
+

@@ -1,6 +1,3 @@
-from userprofile import UserProfile
-
-
 class Message:
     def __init__(self, id=0, date=None, out=0, user_id=0, read_state=0, title='...', body='', user=None):
         self.id = id
