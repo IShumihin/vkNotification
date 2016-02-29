@@ -6,10 +6,6 @@ class UserProfile:
         self.screen_name = screen_name
         self.photo = photo
         self.online = online
-        # response = requests.get(self.photo, stream=True)
-        # with open("photo/%i.png" % self._id, 'wb') as out_file:
-        #     shutil.copyfileobj(response.raw, out_file)
-        # del response
 
     def get_name(self):
         return "%s %s (%s)" % (self.last_name, self.first_name, self.screen_name)

@@ -1,7 +1,8 @@
 from main import Main
 
 if __name__ == '__main__':
-    main = Main('login', 'password', debug=1)
+    # указать свои данные для авторизации
+    main = Main('login', 'password')
     main.enable().main_loop()
 
 
