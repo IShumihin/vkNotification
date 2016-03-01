@@ -88,6 +88,7 @@ class Main:
         except Exception as e:  # при запросепроизошла непредвиденная ошибка
             print(e)  # выводим её
             return  # и пропускае
+        self.__degug(response.text)
         if not self.__check_fail_long_poll(response):  # проверяем на ошибки
             return  # если они есть, то пропускаем
         data = json.loads(response.text)  # получаем данные с сервера событий в словарь
@@ -99,7 +100,23 @@ class Main:
 
     def __log(self, msg):  # логи, если они включены
         if self.debug >= 1:
-            print(time.strftime("%d.%m.%Y %H:%M:%S") + ': ' + str(msg))
+            print(time.strftime("%d.%m.%Y %H:%M:%S") + ' [L]: ' + str(msg))
+
+    def __error(self, msg):  # серьёзные ошибки, если они включены
+        if self.debug >= 2:
+            print(time.strftime("%d.%m.%Y %H:%M:%S") + ' [E]: ' + str(msg))
+
+    def __warning(self, msg):  # разные предупреждения, если они включены
+        if self.debug >= 3:
+            print(time.strftime("%d.%m.%Y %H:%M:%S") + ' [W]: ' + str(msg))
+
+    def __info(self, msg):  # информация, если они включены
+        if self.debug >= 4:
+            print(time.strftime("%d.%m.%Y %H:%M:%S") + ' [I]: ' + str(msg))
+
+    def __degug(self, msg):  # отладка, если они включены
+        if self.debug >= 20:
+            print(time.strftime("%d.%m.%Y %H:%M:%S") + ' [D]: ' + str(msg))
 
     def __events(self, updates):  # обработка событий
         for up in updates:  # по всем событиям
@@ -117,9 +134,11 @@ class Main:
 
     def __check_fail_long_poll(self, response):  # не провалился ли сервер событий
         if response.status_code != 200:  # получили не 200:ОК
+            self.__error('Ошибка запроса, получен ответ %s' % response.status_code)
             return False
         else:
             data = json.loads(response.text)
+            self.__info(data)
             fail = data.get('failed')  # получили провал
             if fail is not None:
                 if fail == 1:  # время устарело
@@ -127,6 +146,7 @@ class Main:
                 elif fail == 2 | fail == 3:  # что-то совсем дурно
                     poll = self.get_long_poll()  # тупо перезапустим сервер событий
                     self.server, self.key, self.ts, self.pts = self.__get_config_poll(poll)
+                self.__warning('Запрос сфейлился: %s' % fail)
                 return False
         return True
 
@@ -136,6 +156,7 @@ class Main:
 
     def __get_long_poll_history(self, fields='photo,online,screen_name'):  # получаем историю ЛС
         data = self.vk.method('messages.getLongPollHistory', {'ts': self.ts, 'pts': self.pts, 'fields': fields})
+        self.__degug(data)
         messages_raw = data.get('messages')  # получаем сообещния
         profiles = data.get('profiles')  # получаем профили
         pts = data.get('new_pts')  # получаем новую метку
@@ -200,6 +221,7 @@ class Main:
             cmd = "notify-send -i %s '%s' '%s'" % (icon, title, message)
         else:
             cmd = "notify-send '%s' '%s'" % (title, message)
+        self.__degug(cmd)
         os.system(cmd)  # шлём оповещение
 
     @staticmethod
