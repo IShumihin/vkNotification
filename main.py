@@ -5,10 +5,10 @@ from userprofile import UserProfile
 from chat import Chat
 import os
 import requests
+import time
 
 
 class Main:
-
     __users = {}  # множество профилей пользователей
     __chats = {}  # множество бесед
     platforms = {  # платформы
@@ -95,7 +95,7 @@ class Main:
 
     def __log(self, msg):  # логи, если они включены
         if self.debug >= 1:
-            print(msg)
+            print(time.strftime("%d.%m.%Y %H:%M:%S") + ': ' + str(msg))
 
     def __events(self, updates):  # обработка событий
         for up in updates:  # по всем событиям
