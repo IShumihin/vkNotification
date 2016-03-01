@@ -83,7 +83,11 @@ class Main:
         return self
 
     def loop(self):  # петля. Все действия тут
-        response = requests.get(self.long_poll_url())  # получаем события с сервера событий
+        try:
+            response = requests.get(self.long_poll_url())  # получаем события с сервера событий
+        except Exception as e:  # при запросепроизошла непредвиденная ошибка
+            print(e)  # выводим её
+            return  # и пропускае
         if not self.__check_fail_long_poll(response):  # проверяем на ошибки
             return  # если они есть, то пропускаем
         data = json.loads(response.text)  # получаем данные с сервера событий в словарь
