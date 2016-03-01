@@ -204,7 +204,7 @@ class Main:
         _name = url[ind + 1:]  # обрезаем строку от последнего /
         _dir = os.path.abspath(os.path.dirname(__file__))  # получаем абсолютный путь до себя
         if not os.path.isdir(_dir + "/cache"):  # при еобходимости создадим папку с иконками
-            os.system('mkdir ' + _dir + '/cache')
+            os.makedirs(_dir + '/cache')
         if not os.path.exists(_dir + "/cache/" + _name):  # если иконки нет
             r = requests.get(url, stream=True)  # делаем магию
             if r.status_code == 200:
