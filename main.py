@@ -47,7 +47,6 @@ class Main:
             # 80: lambda u, vk: 'новый счетчик непрочитанных в левом меню стал равен %s' % (u[1]),
             # 114: lambda u, vk: 'изменились настройки оповещений %s' % (u[1]),
         }
-        logging.basicConfig(filename='vk.log', level=logging.DEBUG)
         # получить сервер событий
         self.get_long_poll = lambda: self.vk.method('messages.getLongPollServer', {'need_pts': 1})
         # урл сервера событий
