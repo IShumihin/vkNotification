@@ -248,3 +248,28 @@ class Main:
         fh.setFormatter(formatter)
         self.logger.addHandler(ch)
         self.logger.addHandler(fh)
+        
+    def conf_test(cfg_path):
+        if os.path.isfile(cfg_path): #проверяет наличие конфига
+            file = open(cfg_path)
+            conf = '{'+file.read()+'}' #так и должно быть
+            file.close()
+            conf = json.loads(conf) #конвертирование из string в dictionary (строка -> словарь)
+            if (conf['первый'] == 'true'): #проверка конфига
+                print('test')
+            if (conf['второй'] == 'true'): 
+                print('test2')
+            if (conf['третий'] == 'true'):
+                print('test3')
+        else:
+        make_conf(cfg_path) #нет конфига -> создай конфиг
+    def make_conf(cfg_path):
+        file = open(cfg_path, 'w') #То, что ниже, — шаблон конфига
+        tmp = '''
+"первый": "true",
+"второй": "true",
+"третий": "true"
+'''
+        file.write(tmp) #запиши изменения
+        file.close()
+        сonf_test(cfg_path) #вернись к проверке
