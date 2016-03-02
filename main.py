@@ -140,12 +140,11 @@ class Main:
             data = json.loads(response.text)
             self.__info(data)
             fail = data.get('failed')  # получили провал
-            if fail is not None:
-                if fail == 1:  # время устарело
-                    self.ts = data['ts']  # получаем новое время
-                elif fail == 2 | fail == 3:  # что-то совсем дурно
-                    poll = self.get_long_poll()  # тупо перезапустим сервер событий
-                    self.server, self.key, self.ts, self.pts = self.__get_config_poll(poll)
+            if fail is not None:  # если есть фейл
+                poll = self.get_long_poll()  # тупо перезапустим сервер событий
+                self.__log(poll)  # выводим в лог данные сервера событий
+                self.notification(None, self.title, "Получен новый сервер событий")  # говорим, что готовы
+                self.server, self.key, self.ts, self.pts = self.__get_config_poll(poll)
                 self.__warning('Запрос сфейлился: %s' % fail)
                 return False
         return True
