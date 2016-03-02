@@ -1,8 +1,9 @@
 from main import Main
+import logging
 
 if __name__ == '__main__':
     # указать свои данные для авторизации
-    main = Main('login', 'password')
+    main = Main('login', 'password', debug_stream=logging.CRITICAL, debug_file=logging.CRITICAL)
     main.enable().main_loop()
 
 

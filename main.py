@@ -5,7 +5,7 @@ from userprofile import UserProfile
 from chat import Chat
 import os
 import requests
-import time
+import logging
 
 
 class Main:
@@ -21,7 +21,7 @@ class Main:
         7: 'web'
     }
 
-    def __init__(self, login, password, debug=None, loop=False):
+    def __init__(self, login, password, debug_stream=logging.ERROR, debug_file=logging.DEBUG, loop=False):
         self.codes = {  # ответы
             # 0: lambda u: 'Сообение %s удалено' % u[1],
             # 1: lambda u: 'Замена флагов сообщения %s на %s' % (u[1], u[2]),
@@ -47,13 +47,17 @@ class Main:
             # 80: lambda u, vk: 'новый счетчик непрочитанных в левом меню стал равен %s' % (u[1]),
             # 114: lambda u, vk: 'изменились настройки оповещений %s' % (u[1]),
         }
+        logging.basicConfig(filename='vk.log', level=logging.DEBUG)
         # получить сервер событий
         self.get_long_poll = lambda: self.vk.method('messages.getLongPollServer', {'need_pts': 1})
         # урл сервера событий
         self.long_poll_url = lambda: 'http://%s?act=a_check&key=%s&ts=%s&wait=%s&mode=64' % (
             self.server, self.key, self.ts, self.time_wait)
         self.title = "vkNoty"  # заголовок для обычных событий
-        self.debug = debug  # уровень дебага
+        self.debug = debug_stream  # уровень дебага
+        self.log = debug_file  # уровень записи в файл
+        self.logger = logging.getLogger('vk')
+        self.init_logger()
         self.vk = vk_api.VkApi(login, password)  # создаём объект для работы с API
 
         try:
@@ -99,24 +103,19 @@ class Main:
         self.__message(messages)  # выводим лс
 
     def __log(self, msg):  # логи, если они включены
-        if self.debug >= 1:
-            print(time.strftime("%d.%m.%Y %H:%M:%S") + ' [L]: ' + str(msg))
+        self.logger.log(logging.CRITICAL, msg)
 
     def __error(self, msg):  # серьёзные ошибки, если они включены
-        if self.debug >= 2:
-            print(time.strftime("%d.%m.%Y %H:%M:%S") + ' [E]: ' + str(msg))
+        self.logger.error(msg)
 
     def __warning(self, msg):  # разные предупреждения, если они включены
-        if self.debug >= 3:
-            print(time.strftime("%d.%m.%Y %H:%M:%S") + ' [W]: ' + str(msg))
+        self.logger.warning(msg)
 
     def __info(self, msg):  # информация, если они включены
-        if self.debug >= 4:
-            print(time.strftime("%d.%m.%Y %H:%M:%S") + ' [I]: ' + str(msg))
+        self.logger.info(msg)
 
     def __degug(self, msg):  # отладка, если они включены
-        if self.debug >= 20:
-            print(time.strftime("%d.%m.%Y %H:%M:%S") + ' [D]: ' + str(msg))
+        self.logger.debug(msg)
 
     def __events(self, updates):  # обработка событий
         for up in updates:  # по всем событиям
@@ -237,3 +236,16 @@ class Main:
                     for chunk in r:
                         f.write(chunk)
         return _dir + '/cache/' + _name  # возвращаем абсолютный путь до иконки
+
+    def init_logger(self):
+
+        self.logger.setLevel(self.log)
+        fh = logging.FileHandler('vk.log')
+        fh.setLevel(self.log)
+        ch = logging.StreamHandler()
+        ch.setLevel(self.debug)
+        formatter = logging.Formatter('%(asctime)s: [%(levelname)s] %(message)s', '%d.%m.%Y %H:%M:%S')
+        ch.setFormatter(formatter)
+        fh.setFormatter(formatter)
+        self.logger.addHandler(ch)
+        self.logger.addHandler(fh)
