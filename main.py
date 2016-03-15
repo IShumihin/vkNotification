@@ -21,7 +21,11 @@ class Main:
         7: 'web'
     }
 
-    def __init__(self, login, password, debug_stream=logging.ERROR, debug_file=logging.DEBUG, loop=False):
+    def __init__(self, login, password, debug_stream=logging.ERROR,
+                 debug_file=logging.DEBUG, loop=False, event_codes=None):
+        if event_codes is None:
+            event_codes = []
+        self.event_codes = event_codes
         self.codes = {  # ответы
             # 0: lambda u: 'Сообение %s удалено' % u[1],
             # 1: lambda u: 'Замена флагов сообщения %s на %s' % (u[1], u[2]),
@@ -174,7 +178,7 @@ class Main:
 
     def __check_event(self, event):  # нужно ли выводить событие
         code = self.codes.get(event[0])  # пробуем получить обработчик события
-        if code is not None:  # если получили
+        if code is not None and event[0] in self.event_codes:  # если получили
             return code(event)  # возвращаем обработанный результат
 
     def __get_name(self, _id):  # получаем имя по ID
@@ -248,28 +252,3 @@ class Main:
         fh.setFormatter(formatter)
         self.logger.addHandler(ch)
         self.logger.addHandler(fh)
-        
-    def conf_test(cfg_path):
-        if os.path.isfile(cfg_path): #проверяет наличие конфига
-            file = open(cfg_path)
-            conf = '{'+file.read()+'}' #так и должно быть
-            file.close()
-            conf = json.loads(conf) #конвертирование из string в dictionary (строка -> словарь)
-            if (conf['первый'] == 'true'): #проверка конфига
-                print('test')
-            if (conf['второй'] == 'true'): 
-                print('test2')
-            if (conf['третий'] == 'true'):
-                print('test3')
-        else:
-        make_conf(cfg_path) #нет конфига -> создай конфиг
-    def make_conf(cfg_path):
-        file = open(cfg_path, 'w') #То, что ниже, — шаблон конфига
-        tmp = '''
-"первый": "true",
-"второй": "true",
-"третий": "true"
-'''
-        file.write(tmp) #запиши изменения
-        file.close()
-        сonf_test(cfg_path) #вернись к проверке
